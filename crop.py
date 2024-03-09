@@ -7,24 +7,34 @@ img = cv2.imread('rotated_check.jpg')
 # Convert to grayscale
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-# Apply edge detection or thresholding to find edges
-_, binary = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
+# adjusting the threshold value here
+# blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+_, binary = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)  # Or use adaptive threshold
 
 # Find contours
 contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-# Check ratio, modify according to your case
-RATIO = 3  # This can be changed based on your assumption or ANSI standard
+# Modify the RATIO and min_area as needed based on your checks and their sizes
+RATIO = 3  # Adjust this based on the actual check size and aspect ratio
+min_area = 100  # Adjust this if your check is smaller than expected
 
-# Initialize variable to store the largest contour that meets the criteria
-largest_contour = None
-largest_area = 0
+'''
+# Create a copy of the image to draw contours on for visualization
+contour_img = img.copy()
+for cnt in contours:
+    cv2.drawContours(contour_img, [cnt], -1, (0, 255, 0), 3)
+cv2.imshow("All Contours", contour_img)'''
+
 
 # Loop through all contours to find the largest one that meets the width > height * RATIO condition
+largest_contour = None
+largest_area = min_area
+
 for cnt in contours:
     x, y, w, h = cv2.boundingRect(cnt)
     area = cv2.contourArea(cnt)
-    if w > h * RATIO and area > largest_area:
+    # Temporarily remove or relax the aspect ratio and area constraints to see if the correct contour gets selected
+    if area > largest_area:
         largest_area = area
         largest_contour = cnt
 
